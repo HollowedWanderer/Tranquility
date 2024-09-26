@@ -2,6 +2,8 @@ package net.hollowed.tranquility;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.hollowed.tranquility.blocks.ModBlocks;
+import net.hollowed.tranquility.worldgen.tree.ModTrunkPlacerTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,9 @@ public class Tranquility implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+
+		ModBlocks.registerModBlocks();
+		ModTrunkPlacerTypes.register();
 
 		LOGGER.info("Hello Fabric world!");
 	}

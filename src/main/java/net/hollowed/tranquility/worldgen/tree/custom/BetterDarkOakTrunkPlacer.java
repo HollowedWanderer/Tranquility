@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.hollowed.tranquility.worldgen.tree.ModTrunkPlacerTypes;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PillarBlock;
@@ -44,6 +45,9 @@ public class BetterDarkOakTrunkPlacer extends TrunkPlacer {
         setToRootedDirt(replacer, startPos.down().east());
         setToRootedDirt(replacer, startPos.down().south().east());
 
+        int lastBranchY = -1; // Track the y-level of the last branch added
+
+
         // Generate the trunk and roots for the 2x2 base
         for (int i = 0; i < height; ++i) {
             BlockPos currentPos = startPos.up(i);
@@ -64,9 +68,11 @@ public class BetterDarkOakTrunkPlacer extends TrunkPlacer {
                     for (Direction direction : Direction.Type.HORIZONTAL) {
                         if (!branchAdded && random.nextBoolean()) {
                             BlockPos branchBasePos = currentPos.offset(direction);
-                            if (TreeFeature.isAirOrLeaves(world, branchBasePos)) {
+                            // Ensure vertical space between branches
+                            if (TreeFeature.isAirOrLeaves(world, branchBasePos) && (i > lastBranchY + 1)) {
                                 foliageNodes.addAll(generateBranch(world, replacer, random, branchBasePos, config, direction));
                                 branchAdded = true;
+                                lastBranchY = i; // Update last branch position
                             }
                         }
                     }
@@ -178,12 +184,14 @@ public class BetterDarkOakTrunkPlacer extends TrunkPlacer {
         placeLog(world, replacer, random, rootPos, config);
 
         // Check if the block below is dirt and replace with rooted dirt
-        if (world.testBlockState(rootPos.down(), state -> state.isOf(Blocks.DIRT))) {
-            replacer.accept(rootPos.down(), Blocks.ROOTED_DIRT.getDefaultState());
+        for (int i = 2; i < 4; i++) {
+            if (world.testBlockState(rootPos.down(i), state -> state.isOf(Blocks.DIRT))) {
+                replacer.accept(rootPos.down(i), Blocks.ROOTED_DIRT.getDefaultState());
 
-            // If air is below the rooted dirt, place hanging roots
-            if (world.testBlockState(rootPos.down(2), BlockState::isAir)) {
-                replacer.accept(rootPos.down(2), Blocks.HANGING_ROOTS.getDefaultState());
+                // If air is below the rooted dirt, place hanging roots
+                if (world.testBlockState(rootPos.down(i + 1), AbstractBlock.AbstractBlockState::isAir)) {
+                    replacer.accept(rootPos.down(i + 1), Blocks.HANGING_ROOTS.getDefaultState());
+                }
             }
         }
 

@@ -3,6 +3,7 @@
   "package": "net.hollowed.tranquility.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "FarlandsMixin",
     "TrunkPlacerTypeInvoker"
   ],
   "injectors": {
